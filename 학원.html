@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학원 정보 조회</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<h1>학원 정보 조회</h1>
+<label for="acaNameInput">학원명 입력:</label>
+<input type="text" id="acaNameInput" placeholder="학원명을 입력하세요">
+<label for="acadistrict_Input">행정구역 입력:</label>
+<input type="text" id="acadistrict_Input" placeholder="행정구역을 입력하세요">
+
+<!-- 왼쪽 버튼 -->
+<button id="leftButton" class="arrow-button" onclick="move('left')">
+  ← 이전
+</button>
+<label id="PageNumId">1</label>
+<!-- 오른쪽 버튼 -->
+<button id="rightButton" class="arrow-button" onclick="move('right')">
+  다음 →
+</button>
+
+
+
+<button onclick="getData()">학원 정보 가져오기</button>
+<!-- 로딩중을 표시 -->
+<div id="loading" style="display: none;">로딩 중...</div>
+<!-- 가져온 데이터 표시용 -->
+<div id="result"></div>
+
+
+<script>
+  const apiKey = '16f8fe1d3f364560a8ec9551e5935f84';
+  const apiEndpoint = 'https://open.neis.go.kr/hub/acaInsTiInfo';
+  const defaultParams = {
+    KEY: apiKey,
+    Type: 'json',
+    pSize: 10,
+  };
+
+  async function acaInsTiInfoData(params) {
+    try {
+      const response = await axios.get(apiEndpoint, { params: { ...defaultParams, ...params } });
+
+      if (response.data.acaInsTiInfo && response.data.acaInsTiInfo[1] && response.data.acaInsTiInfo[1].row) {
+        const acaInsTiInfoData = response.data.acaInsTiInfo[1].row.map(data => {
+          const academyInfo = {
+            academyCode: Array.isArray(data.ACA_ASNUM) ? data.ACA_ASNUM[0] : data.ACA_ASNUM,
+            academyName: Array.isArray(data.ACA_NM) ? data.ACA_NM[0] : data.ACA_NM,
+            areaName: Array.isArray(data.ADMST_ZONE_NM) ? data.ADMST_ZONE_NM[0] : data.ADMST_ZONE_NM,
+            academyType: Array.isArray(data.ACA_INSTI_SC_NM) ? data.ACA_INSTI_SC_NM[0] : data.ACA_INSTI_SC_NM,
+            establishmentDate: Array.isArray(data.ESTBL_YMD) ? data.ESTBL_YMD[0] : data.ESTBL_YMD,
+            registrationDate: Array.isArray(data.REG_YMD) ? data.REG_YMD[0] : data.REG_YMD,
+            registrationStatus: Array.isArray(data.REG_STTUS_NM) ? data.REG_STTUS_NM[0] : data.REG_STTUS_NM,
+            address: Array.isArray(data.FA_RDNMA) ? data.FA_RDNMA[0] : data.FA_RDNMA,
+            telNumber: Array.isArray(data.FA_TELNO) ? data.FA_TELNO[0] : data.FA_TELNO,
+          };
+          return academyInfo;
+        });
+
+        return acaInsTiInfoData;
+      } else {
+        console.error('응답 데이터에 필요한 정보가 없습니다.');
+        return [];
+      }
+    } catch (error) {
+      console.error('API 요청에 실패했습니다.', error);
+      throw error;
+    }
+  }
+
+  async function getData() {
+    try {
+      //데이터를 불러오는 동안 로딩 상태를 표시
+      const loadingElement = document.getElementById('loading');
+      loadingElement.style.display = 'block';
+
+      const ACA_NM = document.getElementById('acaNameInput').value;
+      const ACADISTR= document.getElementById('acadistrict_Input').value;
+      const requestParams = {
+        ATPT_OFCDC_SC_CODE: 'B10',
+        ADMST_ZONE_NM: ACADISTR,
+        ACA_NM:ACA_NM,
+        pIndex: PageNum,
+      };
+      //pIndex은 페이지 이동을 확인 할것 
+      const acaData = await acaInsTiInfoData(requestParams);
+      const resultElement = document.getElementById('result');
+      resultElement.innerHTML = '<h2>학원 정보</h2>';
+      
+      //데이터 로딩이 완료되면 로딩 상태를 감춤
+      loadingElement.style.display = 'none';
+
+      if (acaData.length > 0) {
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <tr>
+            <th>학원 코드</th>
+            <th>학원명</th>
+            <th>행정구역</th>
+            <th>학원 유형</th>
+            <th>설립일</th>
+            <th>등록일</th>
+            <th>등록 상태</th>
+            <th>주소</th>
+            <th>전화번호</th>
+          </tr>
+        `;
+
+        acaData.forEach(data => {
+          const row = table.insertRow();
+          row.innerHTML = `
+            <td>${data.academyCode}</td>
+            <td>${data.academyName}</td>
+            <td>${data.areaName}</td>
+            <td>${data.academyType}</td>
+            <td>${data.establishmentDate}</td>
+            <td>${data.registrationDate}</td>
+            <td>${data.registrationStatus}</td>
+            <td>${data.address}</td>
+            <td>${data.telNumber}</td>
+          `;
+        });
+
+        resultElement.appendChild(table);
+      } else {
+        resultElement.innerHTML += '<p>데이터가 없습니다.</p>';
+      }
+    } catch (error) {
+      console.error('데이터를 가져오는 중에 오류가 발생했습니다.', error);
+    }
+  }
+
+  //페이지 이동
+  let PageNum =1;
+      async function move(NUM){
+        if (NUM==='left'&&PageNum>=2) {
+            PageNum=PageNum-1;
+        } else if (NUM==='right') {
+            PageNum=PageNum+1;
+        }
+
+        document.getElementById('PageNumId').innerHTML=PageNum;
+        getData()
+    }
+    //
+
+    //
+    function ENTER(inputId) {
+      document.getElementById(inputId).addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        getData();
+      }
+    });
+    }
+
+    ENTER('acaNameInput');
+    ENTER('acadistrict_Input');
+    //
+</script>
+
+</body>
+</html>

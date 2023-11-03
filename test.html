@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- 왼쪽 버튼 -->
+<button id="leftButton" class="arrow-button" onclick="move('left')">
+    ← 이전
+  </button>
+  <label id="PageNumId">1</label>
+  <!-- 오른쪽 버튼 -->
+  <button id="rightButton" class="arrow-button" onclick="move('right')">
+    다음 →
+  </button>
+  <script>
+      let PageNum =1;
+      async function move(NUM){
+        if (NUM==='left'&&PageNum>=2) {
+            PageNum=PageNum-1;
+        } else if (NUM==='right') {
+            PageNum=PageNum+1;
+        }
+
+        document.getElementById('PageNumId').innerHTML=PageNum;
+
+    }
+  </script>
+</body>
+</html>
