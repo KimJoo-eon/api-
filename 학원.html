@@ -75,6 +75,8 @@
 
   async function getData() {
     try {
+      Easter_Egg('acaNameInput');
+      Easter_Egg('acadistrict_Input');
       //데이터를 불러오는 동안 로딩 상태를 표시
       const loadingElement = document.getElementById('loading');
       loadingElement.style.display = 'block';
@@ -162,6 +164,16 @@
     ENTER('acaNameInput');
     ENTER('acadistrict_Input');
     //
+
+
+    //????
+    function Easter_Egg(inputId) {
+      const element_EGG = document.getElementById(inputId).value.toLowerCase();
+      if(element_EGG === '승욱승욱'|element_EGG === '승욱'){
+        alert("승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱승욱");
+      }
+    };
+    //????
 </script>
 
 </body>
